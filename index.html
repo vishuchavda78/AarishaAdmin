@@ -1,0 +1,841 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aarisha — Admin Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="Logo.png">
+  <style>
+    /* ── Reset and Variables ── */
+    :root {
+      --green-deep: #2D4A2D;
+      --green-dark: #1E351E;
+      --green-darker: #162816;
+      --gold: #C9A96E;
+      --gold-light: #D4BA82;
+      --gold-pale: #E8D5A8;
+      --cream: #F5F0E8;
+      --font-heading: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
+      --font-body: 'Jost', 'Raleway', Helvetica, sans-serif;
+    }
+
+    /* ── Admin Layout ── */
+    .admin-body {
+      min-height: 100vh;
+      background: #264026; /* Dark Green matching screenshot */
+      font-family: var(--font-body);
+      color: var(--cream);
+      padding: 60px 40px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .admin-container {
+      width: 100%;
+      max-width: 1100px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 24px;
+      position: relative;
+    }
+
+    .admin-header h1 {
+      font: 300 48px var(--font-heading);
+      color: var(--cream);
+      letter-spacing: 2px;
+      margin: 0 0 12px 0;
+    }
+
+    .admin-header p {
+      font: 300 13px var(--font-body);
+      color: rgba(245, 240, 232, 0.7);
+      margin: 0;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-logout {
+      background: transparent;
+      border: 1px solid rgba(201, 169, 110, 0.4);
+      color: rgba(201, 169, 110, 0.85);
+      padding: 12px 24px;
+      font: 300 11px var(--font-body);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 10px;
+    }
+
+    .btn-logout:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: rgba(201, 169, 110, 0.05);
+    }
+
+    /* ── Actions Bar ── */
+    .admin-actions-bar {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+    }
+
+    .btn-admin-action {
+      background: transparent;
+      border: 1px solid rgba(201, 169, 110, 0.4);
+      color: rgba(201, 169, 110, 0.85);
+      padding: 12px 24px;
+      font: 300 11px var(--font-body);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-admin-action:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: rgba(201, 169, 110, 0.05);
+    }
+
+    .btn-admin-action:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    /* ── Products Table ── */
+    .products-table-wrap {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    .products-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .products-table thead th {
+      padding: 12px 0;
+      font: 300 11px var(--font-body);
+      color: var(--gold);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      border-bottom: 1px solid rgba(201, 169, 110, 0.15);
+    }
+
+    .products-table tbody tr {
+      border-bottom: 1px solid rgba(245, 240, 232, 0.1);
+      transition: background 0.2s;
+    }
+
+    .products-table tbody tr:hover {
+      background: rgba(201, 169, 110, 0.02);
+    }
+
+    .products-table tbody td {
+      padding: 24px 0;
+      font: 300 15px var(--font-body);
+      color: var(--cream);
+      vertical-align: middle;
+    }
+
+    .product-thumb {
+      width: 64px;
+      height: 64px;
+      object-fit: cover;
+      border: 1px solid rgba(201, 169, 110, 0.4);
+      display: block;
+    }
+
+    .product-name-cell {
+      font-weight: 600;
+    }
+
+    .product-price {
+      color: var(--gold);
+    }
+
+    .stock-check {
+      color: #72c779;
+      font-size: 18px;
+    }
+
+    .product-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn-action {
+      background: transparent;
+      border: 1px solid rgba(201, 169, 110, 0.4);
+      color: rgba(201, 169, 110, 0.85);
+      padding: 8px 16px;
+      font: 300 11px var(--font-body);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-action:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: rgba(201, 169, 110, 0.05);
+    }
+
+    .btn-action.danger:hover {
+      border-color: #e26a6a;
+      color: #e26a6a;
+      background: rgba(226, 106, 106, 0.05);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: rgba(245, 240, 232, 0.45);
+    }
+
+    .empty-state p {
+      font: 300 15px var(--font-body);
+      margin-bottom: 20px;
+    }
+
+    /* ── Status bar ── */
+    .admin-status-bar {
+      font: 300 13px var(--font-body);
+      color: var(--gold);
+      margin-bottom: 20px;
+      min-height: 20px;
+    }
+
+    /* ── Dialog & Modals ── */
+    .admin-dialog {
+      position: fixed;
+      inset: 0;
+      width: min(600px, calc(100% - 32px));
+      max-height: calc(100vh - 32px);
+      margin: auto;
+      padding: 36px 32px;
+      overflow: auto;
+      border: 1px solid var(--gold);
+      background: var(--green-darker);
+      color: var(--cream);
+    }
+
+    .admin-dialog::backdrop {
+      background: rgba(0, 0, 0, 0.7);
+    }
+
+    .admin-dialog h2 {
+      font: 300 32px var(--font-heading);
+      color: var(--cream);
+      letter-spacing: 1.5px;
+      margin-bottom: 24px;
+    }
+
+    .admin-dialog .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .admin-dialog .form-grid .full {
+      grid-column: 1 / -1;
+    }
+
+    .admin-dialog label {
+      display: block;
+      font-size: 11px;
+      color: var(--gold);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 7px;
+    }
+
+    .admin-dialog input,
+    .admin-dialog select,
+    .admin-dialog textarea {
+      width: 100%;
+      padding: 12px 14px;
+      color: var(--cream);
+      background: rgba(245, 240, 232, 0.05);
+      border: 1px solid rgba(201, 169, 110, 0.25);
+      font: 300 14px var(--font-body);
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    .admin-dialog input:focus,
+    .admin-dialog select:focus,
+    .admin-dialog textarea:focus {
+      border-color: var(--gold);
+    }
+
+    .admin-dialog textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    .admin-dialog .dialog-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+      grid-column: 1 / -1;
+    }
+
+    /* ── Confirm Modal ── */
+    .confirm-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 5000;
+      background: rgba(0, 0, 0, 0.6);
+      display: grid;
+      place-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    .confirm-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .confirm-box {
+      background: var(--green-darker);
+      border: 1px solid var(--gold);
+      padding: 32px;
+      max-width: 400px;
+      width: calc(100% - 32px);
+      text-align: center;
+    }
+
+    .confirm-box h3 {
+      font: 300 24px var(--font-heading);
+      color: var(--cream);
+      margin-bottom: 8px;
+    }
+
+    .confirm-box p {
+      font: 300 14px var(--font-body);
+      color: rgba(245, 240, 232, 0.6);
+      margin-bottom: 24px;
+    }
+
+    .confirm-box .confirm-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    /* ── Login Screen ── */
+    .admin-login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #264026;
+      padding: 24px;
+    }
+
+    .admin-login-card {
+      width: 100%;
+      max-width: 440px;
+      padding: 48px 40px;
+      border: 1px solid rgba(201, 169, 110, 0.25);
+      background: rgba(22, 40, 22, 0.5);
+      backdrop-filter: blur(16px);
+    }
+
+    .admin-login-card .login-logo {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .admin-login-card .login-logo img {
+      height: 50px;
+      margin: 0 auto 12px;
+    }
+
+    .admin-login-card .login-logo h1 {
+      font: 300 28px var(--font-heading);
+      color: var(--cream);
+      letter-spacing: 3px;
+    }
+
+    .admin-login-card .login-logo p {
+      font: 300 13px var(--font-body);
+      color: rgba(245, 240, 232, 0.5);
+      margin-top: 6px;
+    }
+
+    .admin-login-card .login-form {
+      display: grid;
+      gap: 18px;
+    }
+
+    .admin-login-card label {
+      display: grid;
+      gap: 7px;
+      font-size: 11px;
+      color: var(--gold);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .admin-login-card input {
+      width: 100%;
+      padding: 13px 16px;
+      background: rgba(245, 240, 232, 0.05);
+      border: 1px solid rgba(201, 169, 110, 0.25);
+      color: var(--cream);
+      font: 300 15px var(--font-body);
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    .admin-login-card input:focus {
+      border-color: var(--gold);
+    }
+
+    .admin-login-card .login-status {
+      min-height: 20px;
+      font: 300 13px var(--font-body);
+      color: var(--gold-pale);
+      text-align: center;
+    }
+
+    .admin-login-card .login-status.error {
+      color: #e26a6a;
+    }
+
+    .hidden { display: none !important; }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .admin-body { padding: 40px 20px; }
+      .admin-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+      .btn-logout { margin-top: 0; align-self: flex-start; }
+      .products-table thead { display: none; }
+      .products-table tbody tr {
+        display: grid;
+        grid-template-columns: 64px 1fr;
+        gap: 12px;
+        padding: 20px 0;
+      }
+      .products-table tbody td { padding: 0; }
+      .products-table tbody td:nth-child(1) { grid-row: 1 / 4; }
+      .products-table tbody td:nth-child(2) { font-size: 16px; }
+      .products-table tbody td:nth-child(3) { color: var(--gold); }
+      .products-table tbody td:nth-child(4) { text-align: left !important; }
+      .products-table tbody td:nth-child(5) { grid-column: 1 / -1; margin-top: 8px; }
+      .product-actions { gap: 8px; }
+      .btn-action { padding: 6px 12px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- ═══════ LOGIN SCREEN ═══════ -->
+  <div class="admin-login-screen" id="loginScreen">
+    <div class="admin-login-card">
+      <div class="login-logo">
+        <img src="Logo.png" alt="Aarisha">
+        <h1>Admin Dashboard</h1>
+        <p>Sign in to manage your collection</p>
+      </div>
+      <form class="login-form" id="loginForm">
+        <label>
+          Email
+          <input type="email" id="loginEmail" placeholder="admin@aarisha.com" required autocomplete="username">
+        </label>
+        <label>
+          Password
+          <input type="password" id="loginPassword" placeholder="••••••••" required autocomplete="current-password" minlength="8">
+        </label>
+        <p class="login-status" id="loginStatus" role="status"></p>
+        <button class="btn-admin primary" type="submit" id="loginBtn" style="width:100%;padding:14px;">Sign In</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══════ ADMIN DASHBOARD ═══════ -->
+  <div class="admin-body hidden" id="dashboardView">
+    <div class="admin-container">
+      <header class="admin-header">
+        <div class="admin-header-left">
+          <h1>Aarisha Admin</h1>
+          <p>Manage the public product catalogue. Admin credentials stay on the API server.</p>
+        </div>
+        <div class="admin-header-right">
+          <button class="btn-logout" id="headerLogout" type="button">Logout</button>
+        </div>
+      </header>
+
+      <div class="admin-actions-bar">
+        <button class="btn-admin-action" id="addProductBtn" type="button">Add Product</button>
+        <button class="btn-admin-action" id="deduplicateBtn" type="button">Remove Duplicates</button>
+      </div>
+
+      <!-- Status Messages -->
+      <div class="admin-status-bar" id="adminStatus" role="status"></div>
+
+      <div class="products-table-wrap">
+        <table class="products-table" id="productsTable">
+          <thead>
+            <tr>
+              <th>Image</th>
+              <th>Product Name</th>
+              <th>Price</th>
+              <th style="text-align: center;">In Stock</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="productsTableBody"></tbody>
+        </table>
+        <div class="empty-state hidden" id="productsEmpty">
+          <p>No products in the catalogue.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ PRODUCT FORM DIALOG ═══════ -->
+  <dialog class="admin-dialog" id="productDialog">
+    <form id="productForm">
+      <h2 id="dialogTitle">Add Product</h2>
+      <div class="form-grid">
+        <div>
+          <label>Product Name</label>
+          <input name="name" required placeholder="e.g. Golden Hoop Earrings">
+        </div>
+        <div>
+          <label>Price (INR)</label>
+          <input name="price" type="number" step="0.01" min="0.01" required placeholder="1299">
+        </div>
+        <div>
+          <label>Category</label>
+          <select name="category">
+            <option value="earrings">Earrings</option>
+            <option value="rings">Rings</option>
+            <option value="bracelets">Bracelets</option>
+            <option value="necklaces">Necklaces</option>
+          </select>
+        </div>
+        <div>
+          <label>Stock Status</label>
+          <select name="in_stock">
+            <option value="true">In Stock</option>
+            <option value="false">Out of Stock</option>
+          </select>
+        </div>
+        <div class="full">
+          <label>Image URL (Google Drive or direct link)</label>
+          <input name="image_url" type="url" required placeholder="https://drive.google.com/file/d/... or https://...">
+        </div>
+        <div class="full">
+          <label>Description</label>
+          <textarea name="description" placeholder="Product description…"></textarea>
+        </div>
+        <div class="dialog-actions">
+          <button class="btn-admin primary" type="submit" id="saveBtn">Save Product</button>
+          <button class="btn-admin" type="button" id="cancelEditBtn">Cancel</button>
+        </div>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- ═══════ CONFIRM MODAL ═══════ -->
+  <div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-box">
+      <h3 id="confirmTitle">Are you sure?</h3>
+      <p id="confirmMessage">This action cannot be undone.</p>
+      <div class="confirm-actions">
+        <button class="btn-admin danger" id="confirmYes" type="button">Confirm</button>
+        <button class="btn-admin" id="confirmNo" type="button">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ═══════════════════════════════════════════
+       AARISHA — Admin Dashboard JavaScript
+       ═══════════════════════════════════════════ */
+
+    // Point the browser at the FastAPI backend:
+    // If running locally (localhost / 127.0.0.1), use the local FastAPI server port (8001).
+    // In production (Vercel), use the serverless API endpoint on the same origin (/api).
+    const API = ['127.0.0.1', 'localhost'].includes(location.hostname)
+      ? 'http://127.0.0.1:8001'
+      : `${location.origin}/api`;
+    let token = sessionStorage.getItem('aarisha-admin-token');
+    let editingId = null;
+    let allProducts = [];
+    let pendingConfirm = null;
+
+    // ── Utilities ──
+    const $ = id => document.getElementById(id);
+    const status = (msg, isError = false) => {
+      const el = $('adminStatus');
+      el.textContent = msg;
+      el.style.color = isError ? '#e26a6a' : 'var(--gold)';
+    };
+    const headers = () => ({ 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` });
+    const escape = value => String(value).replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
+    const money = value => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(Number(value));
+
+    async function request(path, options = {}) {
+      const response = await fetch(API + path, options);
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(body.detail || 'Request failed');
+      }
+      return response.status === 204 ? null : response.json();
+    }
+
+    function showConfirm(title, message, onConfirm) {
+      $('confirmTitle').textContent = title;
+      $('confirmMessage').textContent = message;
+      $('confirmOverlay').classList.add('open');
+      pendingConfirm = onConfirm;
+    }
+
+    // ── Login ──
+    $('loginForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const btn = $('loginBtn');
+      const statusEl = $('loginStatus');
+      btn.disabled = true;
+      statusEl.textContent = '';
+      statusEl.className = 'login-status';
+      try {
+        const data = await request('/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: $('loginEmail').value, password: $('loginPassword').value })
+        });
+        token = data.access_token;
+        sessionStorage.setItem('aarisha-admin-token', token);
+        showDashboard();
+      } catch (error) {
+        statusEl.textContent = error.message;
+        statusEl.className = 'login-status error';
+        btn.disabled = false;
+      }
+    });
+
+    // ── Dashboard ──
+    function showDashboard() {
+      $('loginScreen').classList.add('hidden');
+      $('dashboardView').classList.remove('hidden');
+      loadProducts();
+    }
+
+    // ── Load Products ──
+    async function loadProducts() {
+      try {
+        allProducts = await request('/products');
+        renderProducts();
+      } catch (error) {
+        status('Could not load products: ' + error.message, true);
+      }
+    }
+
+    function buildProductRows(products) {
+      return products.map(p => `
+        <tr>
+          <td><img class="product-thumb" src="${escape(p.image_url)}" alt="" loading="lazy"></td>
+          <td><span class="product-name-cell">${escape(p.name)}</span></td>
+          <td><span class="product-price">${money(p.price)}</span></td>
+          <td style="text-align: center;"><span class="stock-check">${p.in_stock ? '✓' : ''}</span></td>
+          <td>
+            <div class="product-actions">
+              <button class="btn-action" data-edit="${p.id}">Edit Product</button>
+              <button class="btn-action danger" data-delete="${p.id}">Delete Product</button>
+              <button class="btn-action" data-stock="${p.id}" data-current="${p.in_stock}">
+                ${p.in_stock ? 'Set Out Of Stock' : 'Set In Stock'}
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderProducts() {
+      const tbody = $('productsTableBody');
+      const empty = $('productsEmpty');
+      const table = $('productsTable');
+      if (allProducts.length) {
+        empty.classList.add('hidden');
+        table.classList.remove('hidden');
+        tbody.innerHTML = buildProductRows(allProducts);
+      } else {
+        empty.classList.remove('hidden');
+        table.classList.add('hidden');
+        tbody.innerHTML = '';
+      }
+    }
+
+    // ── Product Actions (delegated) ──
+    function handleProductAction(event) {
+      const target = event.target;
+      const id = target.dataset.edit || target.dataset.delete || target.dataset.stock;
+      if (!id) return;
+
+      const product = allProducts.find(p => p.id === id);
+      if (!product) return;
+
+      if (target.dataset.edit) {
+        return showProductForm(product);
+      }
+
+      if (target.dataset.stock) {
+        const newStatus = !product.in_stock;
+        showConfirm(
+          newStatus ? 'Mark as In Stock?' : 'Mark as Out of Stock?',
+          `"${product.name}" will be ${newStatus ? 'available' : 'unavailable'} in the storefront.`,
+          async () => {
+            try {
+              await request(`/admin/products/${id}`, { method: 'PATCH', headers: headers(), body: JSON.stringify({ in_stock: newStatus }) });
+              status(`"${product.name}" is now ${newStatus ? 'in stock' : 'out of stock'}.`);
+              await loadProducts();
+            } catch (error) { status(error.message, true); }
+          }
+        );
+        return;
+      }
+
+      if (target.dataset.delete) {
+        showConfirm(
+          'Delete Product?',
+          `"${product.name}" will be permanently removed from the catalogue.`,
+          async () => {
+            try {
+              await request(`/admin/products/${id}`, { method: 'DELETE', headers: headers() });
+              status(`"${product.name}" deleted.`);
+              await loadProducts();
+            } catch (error) { status(error.message, true); }
+          }
+        );
+      }
+    }
+
+    // Listen on table
+    $('productsTableBody').addEventListener('click', handleProductAction);
+
+    // ── Product Form ──
+    function showProductForm(product = null) {
+      editingId = product?.id || null;
+      $('productForm').reset();
+      $('dialogTitle').textContent = editingId ? 'Edit Product' : 'Add Product';
+      $('saveBtn').textContent = editingId ? 'Update Product' : 'Save Product';
+
+      if (product) {
+        Object.entries(product).forEach(([key, value]) => {
+          const el = $('productForm').elements[key];
+          if (el) el.value = value;
+        });
+      }
+      $('productDialog').showModal();
+    }
+
+    $('addProductBtn').addEventListener('click', () => showProductForm());
+    $('cancelEditBtn').addEventListener('click', () => { editingId = null; $('productDialog').close(); });
+    $('productDialog').addEventListener('close', () => { editingId = null; });
+
+    $('productForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const btn = $('saveBtn');
+      if (btn.disabled) return;
+      btn.disabled = true;
+
+      const data = Object.fromEntries(new FormData(event.target));
+      data.price = Number(data.price);
+      data.in_stock = data.in_stock === 'true';
+      if (!data.description) delete data.description;
+
+      try {
+        if (editingId) {
+          await request(`/admin/products/${editingId}`, { method: 'PATCH', headers: headers(), body: JSON.stringify(data) });
+          status('Product updated.');
+        } else {
+          await request('/admin/products', { method: 'POST', headers: headers(), body: JSON.stringify(data) });
+          status('Product added to catalogue.');
+        }
+        $('productForm').reset();
+        editingId = null;
+        $('productDialog').close();
+        await loadProducts();
+      } catch (error) {
+        status(error.message, true);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    // ── Deduplicate ──
+    $('deduplicateBtn').addEventListener('click', async () => {
+      showConfirm(
+        'Remove Duplicate Products?',
+        'This will scan for products with the same name in each category and keep only the newest version.',
+        async () => {
+          const btn = $('deduplicateBtn');
+          btn.disabled = true;
+          try {
+            const result = await request('/admin/products/deduplicate', { method: 'POST', headers: headers() });
+            status(result.deleted ? `Removed ${result.deleted} duplicate${result.deleted === 1 ? '' : 's'}.` : 'No duplicates found.');
+            await loadProducts();
+          } catch (error) { status(error.message, true); }
+          finally { btn.disabled = false; }
+        }
+      );
+    });
+
+    // ── Confirm Modal ──
+    $('confirmYes').addEventListener('click', () => {
+      $('confirmOverlay').classList.remove('open');
+      if (pendingConfirm) pendingConfirm();
+      pendingConfirm = null;
+    });
+    $('confirmNo').addEventListener('click', () => {
+      $('confirmOverlay').classList.remove('open');
+      pendingConfirm = null;
+    });
+    $('confirmOverlay').addEventListener('click', (e) => {
+      if (e.target === $('confirmOverlay')) {
+        $('confirmOverlay').classList.remove('open');
+        pendingConfirm = null;
+      }
+    });
+
+    // ── Logout ──
+    function logout() {
+      sessionStorage.removeItem('aarisha-admin-token');
+      token = null;
+      $('dashboardView').classList.add('hidden');
+      $('loginScreen').classList.remove('hidden');
+      $('loginStatus').textContent = '';
+      $('loginStatus').className = 'login-status';
+      $('loginBtn').disabled = false;
+    }
+
+    $('headerLogout').addEventListener('click', logout);
+
+    // ── Init ──
+    if (token) {
+      showDashboard();
+    } else {
+      // Show login screen (default)
+    }
+  </script>
+</body>
+</html>

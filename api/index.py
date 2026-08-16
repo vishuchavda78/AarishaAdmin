@@ -1,32 +1,37 @@
-"""Vercel entrypoint for the Aarisha Admin API."""
+"""Vercel entrypoint for the Aarisha Admin API.
+
+Vercel rewrites  /api/(.*)  →  /api/index.py
+The ASGI scope keeps the ORIGINAL path, e.g. /api/admin/login.
+So we need to strip the /api prefix before handing off to admin_app,
+which defines its routes without that prefix (e.g. /admin/login).
+"""
 import os
-from fastapi import FastAPI
-from fastapi.responses import FileResponse
+from starlette.types import ASGIApp, Receive, Scope, Send
 
 from backend.app.main import app as admin_app
 
-app = FastAPI()
-app.mount("/api", admin_app)
+API_PREFIX = "/api"
 
-ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-def get_file_path(filename: str) -> str:
-    return os.path.join(ROOT_DIR, filename)
+class StripPrefixMiddleware:
+    """ASGI middleware that strips a URL prefix from incoming requests."""
 
-@app.get("/")
-@app.get("/index.html")
-@app.get("/index")
-async def read_index():
-    return FileResponse(get_file_path("index.html"))
+    def __init__(self, app: ASGIApp, prefix: str) -> None:
+        self.app = app
+        self.prefix = prefix
 
-@app.get("/styles.css")
-async def read_styles():
-    return FileResponse(get_file_path("styles.css"))
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] in ("http", "websocket"):
+            path: str = scope.get("path", "")
+            if path.startswith(self.prefix):
+                scope = dict(scope)
+                scope["path"] = path[len(self.prefix) :] or "/"
+                raw = scope.get("raw_path", b"")
+                if raw and raw.startswith(self.prefix.encode()):
+                    scope["raw_path"] = raw[len(self.prefix) :] or b"/"
+        await self.app(scope, receive, send)
 
-@app.get("/Logo.png")
-async def read_logo():
-    return FileResponse(get_file_path("Logo.png"))
 
-@app.get("/favicon.ico")
-async def read_favicon():
-    return FileResponse(get_file_path("Logo.png"))
+# Vercel looks for the `app` variable.
+# Wrap admin_app with the prefix stripper so /api/admin/login → /admin/login.
+app = StripPrefixMiddleware(admin_app, API_PREFIX)

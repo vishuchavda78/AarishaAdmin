@@ -6,7 +6,7 @@ from fastapi.responses import FileResponse
 from backend.app.main import app as admin_app
 
 app = FastAPI()
-app.mount("/", admin_app)
+app.mount("/api", admin_app)
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 

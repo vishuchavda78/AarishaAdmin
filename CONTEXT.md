@@ -120,3 +120,4 @@ Then visit **http://127.0.0.1:8000/** to see the login screen and admin dashboar
 - **Rate-limited login:** Login has a 5-attempt-per-minute rate limiter per IP (in-memory).
 - **Deduplication:** The deduplicate endpoint keeps only the newest product per name+category group.
 - **Shared database:** The `products` table is shared with The-aarisha storefront. Changes here are immediately visible to customers.
+- **Vercel rewrite fix (2026-08-18):** Login "Method not allowed" on Vercel fixed by changing vercel.json rewrite from `/api/(.*)` → `/api/index.py` to `/api/(.*)` → `/$1`, stripping the `/api/` prefix so FastAPI routes are correctly matched in production.

@@ -92,6 +92,7 @@ c:\Projects\AarishaAdmin/
 2. **Drive Image Thumbnail Resolution:** Whenever a user pastes a Google Drive link, the application parses the unique file ID and converts it to `https://drive.google.com/thumbnail?id=[ID]&sz=w1000` to serve the image preview natively within `<img>` tags.
 3. **Vanilla CSS Design Tokens:** All sizing, spacings, animations, and color schemes are mapped to CSS custom variables in `src/app/globals.css`.
 4. **Price and Discount Synchronization:** On product creation or modification, both `price` and `original_price` columns are set to the base price entered by the user. Applying a category discount calculates a new value for `price` while keeping `original_price` populated as the baseline. Clearing discounts copies `original_price` back into the `price` column, keeping both fields populated and in sync.
+5. **Concurrent Bulk Operations over Upsert:** Bulk operations (like applying and clearing discounts) use individual `.update()` operations resolved concurrently via `Promise.all` instead of PostgREST `.upsert()`. This ensures that Row-Level Security (RLS) policies and PostgreSQL constraints on production environments do not reject the query.
 
 ---
 

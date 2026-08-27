@@ -100,14 +100,23 @@ export async function POST(request: NextRequest) {
       }));
     }
     
-    // 5. Execute bulk update (upsert by primary key id)
+    // 5. Execute bulk update using individual updates concurrently to bypass upsert/RLS issues on deployment
     if (updatePayloads.length > 0) {
-      const { error: updateError } = await supabase
-        .from("products")
-        .upsert(updatePayloads);
-        
+      const updatePromises = updatePayloads.map((payload) =>
+        supabase
+          .from("products")
+          .update({
+            price: payload.price,
+            original_price: payload.original_price,
+          })
+          .eq("id", payload.id)
+      );
+      
+      const results = await Promise.all(updatePromises);
+      const updateError = results.find((r) => r.error)?.error;
+      
       if (updateError) {
-        console.error("Supabase upsert error during bulk discount:", updateError);
+        console.error("Supabase bulk update error during bulk discount:", updateError);
         return NextResponse.json({ error: updateError.message }, { status: 500 });
       }
     }

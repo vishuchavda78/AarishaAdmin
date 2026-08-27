@@ -4,6 +4,16 @@ All notable changes to the Aarisha Admin Panel will be documented in this file i
 
 ---
 
+## [2026-08-27 14:50]
+
+### [Category: Dev] — Upsert to Concurrent Updates & Dynamic Routing
+What changed:
+- Replaced Supabase `.upsert()` with individual `.update()` operations executed concurrently via `Promise.all` in `src/app/api/discounts/route.ts`.
+- Added `export const dynamic = "force-dynamic";` at the top of `src/app/api/products/route.ts`.
+Why: Bypasses PostgREST upsert constraints and Row Level Security permissions issue on live deployment environments, and prevents Next.js from caching the products API statically.
+
+---
+
 ## [2026-08-27 14:12]
 
 ### [Category: Dev] — Database Price and original_price Alignment

@@ -213,6 +213,27 @@
   cursor: not-allowed;
 }
 
+.clearAllBtn {
+  background: none;
+  border: 1px solid var(--color-danger);
+  color: var(--color-danger);
+  padding: var(--space-2-5) var(--space-5);
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-standard);
+}
+
+.clearAllBtn:hover:not(:disabled) {
+  background-color: var(--color-danger-bg);
+}
+
+.clearAllBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .notification {
   display: flex;
   align-items: center;

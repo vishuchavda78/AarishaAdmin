@@ -1,123 +1,116 @@
-# Aarisha Admin Panel — Project Context
+# Context: Aarisha Admin Panel
 
-> **Last Updated:** July 19, 2026
-> **Project:** `The-aarisha-admin`
-
----
-
-## 1. Project Overview
-
-**Pure admin panel** for the **Aarisha** luxury accessories brand. Single-page application — login screen → admin dashboard. No landing page, no signup, no other pages.
-
-Shares a **Supabase (PostgreSQL) database** with [The-aarisha](https://github.com/dhairya-shah13/The-aarisha) (the customer-facing storefront). Admin writes to the `products` table here; the storefront reads from it.
-
-| Layer | Technology |
-|-------|-----------|
-| Frontend | Vanilla HTML5, CSS3, JavaScript (no framework) — single `index.html` |
-| Backend API | Python FastAPI + Uvicorn |
-| Database | Supabase (PostgreSQL) — shared with The-aarisha |
-| Auth | bcrypt password hashing + JWT tokens (admin-only) |
+This is the living reference document for the Aarisha Admin Panel project. It is updated after every execution session to reflect the current status of the codebase, features, architecture, and design system.
 
 ---
 
-## 2. Folder Structure
+## Folder & File Structure
 
-```
-The-aarisha-admin/
-├── CONTEXT.md              ← This file — project context & changelog
-├── README.md               ← Project readme
-├── .gitignore              ← Ignores backend/.env, .venv, __pycache__, *.pyc
-├── index.html              ← SOLE frontend file: login screen + admin dashboard
-├── styles.css              ← Global CSS design system (brand styling)
-├── Logo.png                ← Brand logo asset
-│
-├── backend/
-│   ├── .env.example        ← Template for environment variables
-│   ├── requirements.txt    ← Python dependencies
-│   ├── generate_password_hash.py ← Helper: print bcrypt hash for admin password
-│   └── app/
-│       ├── __init__.py     ← Package marker
-│       └── main.py         ← FastAPI application (ALL routes, models, logic)
-│
-└── supabase-schema.sql     ← Database schema: products table only
-```
-
----
-
-## 3. Complete Route Map (API)
-
-All routes are defined in `backend/app/main.py`.
-
-### Public Routes
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/health` | Health check → `{"status": "ok"}` |
-| `GET` | `/products` | List all products (sorted by `created_at` desc) |
-| `GET` | `/products/{category}` | Filter by category enum: `rings`, `necklaces`, `bracelets`, `earrings` |
-| `GET` | `/products/{product_id}` | Single product by UUID |
-
-### Protected Routes (require JWT Bearer token)
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `POST` | `/admin/login` | Admin-only login (credential check) |
-| `POST` | `/admin/products` | Create a product |
-| `PATCH` | `/admin/products/{product_id}` | Update a product |
-| `DELETE` | `/admin/products/{product_id}` | Delete a product |
-| `POST` | `/admin/products/deduplicate` | Remove duplicate products (same name + category) |
-
-### Static File Serving
-
-| Path | Serves |
-|------|--------|
-| `/` | `index.html` (login screen → admin dashboard) |
-| `/admin` | Redirects to `/` |
-| `/styles.css` | Global CSS |
-| `/Logo.png` | Brand logo |
-| `/*` | Any file in the project root directory |
-
-> **Note:** The static file mount (`app.mount("/", ...)`) is registered **last** so all API routes take precedence.
-
-### Route Ordering Notes
-
-- `GET /products/{category}` (enum-restricted) is registered **before** `GET /products/{product_id}` (string) so that category names like `rings` correctly match the category filter.
-- `POST /admin/products/deduplicate` works because static paths take precedence over dynamic paths in Starlette routing.
-- The `StaticFiles` mount at `/` is registered **last** so no API route is shadowed.
-
----
-
-## 4. Running the Project
-
-```powershell
-cd backend
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-
-# Copy and fill in .env
-copy .env.example .env
-
-# Generate admin password hash
-python generate_password_hash.py
-# Paste the output into ADMIN_PASSWORD_HASH in .env
-
-# Start server
-py -m uvicorn app.main:app --reload --port 8000
+```text
+c:\Projects\AarishaAdmin/
+├── .git/
+├── .next/
+├── public/
+├── src/
+│   ├── app/
+│   │   ├── api/
+│   │   │   ├── auth/
+│   │   │   │   ├── login/
+│   │   │   │   │   └── route.ts
+│   │   │   │   └── logout/
+│   │   │   │       └── route.ts
+│   │   │   ├── discounts/
+│   │   │   │   └── route.ts
+│   │   │   └── products/
+│   │   │       ├── [id]/
+│   │   │       │   └── route.ts
+│   │   │       └── route.ts
+│   │   ├── login/
+│   │   │   ├── login.module.css
+│   │   │   └── page.tsx
+│   │   ├── lib/
+│   │   │   ├── session.ts
+│   │   │   └── supabase.ts
+│   │   ├── globals.css
+│   │   ├── layout.tsx
+│   │   ├── page.module.css
+│   │   └── page.tsx
+│   └── middleware.ts
+├── .env
+├── .gitignore
+├── Changelog.md
+├── Context.md
+├── RULES.md
+├── UISKILL.md
+├── package.json
+├── package-lock.json
+├── tsconfig.json
+└── next.config.ts
 ```
 
-Then visit **http://127.0.0.1:8000/** to see the login screen and admin dashboard.
+---
+
+## Feature List
+
+### Implemented
+- **Scaffolding:** Next.js project with TypeScript, ESLint, and Vanilla CSS Modules.
+- **Secure Authentication:** Web Crypto API-based JWT session authentication and cookie configuration.
+- **Unauthorized Redirection:** Edge middleware to block access to protected dashboard/APIs and redirect to `/login`.
+- **Database Integration:** Server-side Supabase client initialized via Service Role Key (securely bypassing RLS).
+- **Product CRUD APIs & UI:** Add, Edit, Delete, Fetch, and Quick Stock Toggle operations.
+- **Live Google Drive Previews:** Auto-extracts file IDs from shared Google Drive links, converting them into direct preview thumbnails (`/thumbnail?id=[ID]&sz=w1000`) for instant live preview in the form and grid view.
+- **Category Filters:** Rings, Neckpieces, Bracelets, and Earrings catalog filtering with dynamic item counts.
+- **Bulk Discounts:** Apply a percentage-based discount category-wide (storing pre-discount price in `original_price` to prevent stacked calculations) and clear discounts in bulk to restore original prices.
+
+### In-Progress
+- None.
+
+### Planned
+- Staging deployment configuration on Vercel.
 
 ---
 
-## 5. Key Design Decisions
+## Architecture Overview
 
-- **Single-page admin panel:** No landing page, no signup, no navigation away from the dashboard. Login screen → admin panel.
-- **No frontend framework:** All JavaScript is vanilla to keep dependencies minimal and loading fast.
-- **Server-side auth only:** The Supabase service_role key is never exposed to the browser. All DB operations go through the FastAPI backend.
-- **Admin-only auth:** No registration endpoint — admins are predefined in the server `.env` config.
-- **Google Drive image support:** The `drive_image_url()` helper converts Google Drive share links into renderable thumbnail URLs.
-- **Rate-limited login:** Login has a 5-attempt-per-minute rate limiter per IP (in-memory).
-- **Deduplication:** The deduplicate endpoint keeps only the newest product per name+category group.
-- **Shared database:** The `products` table is shared with The-aarisha storefront. Changes here are immediately visible to customers.
-- **Vercel rewrite fix (2026-08-18):** Login "Method not allowed" on Vercel fixed by changing vercel.json rewrite from `/api/(.*)` → `/api/index.py` to `/api/(.*)` → `/$1`, stripping the `/api/` prefix so FastAPI routes are correctly matched in production.
+- **Stack:** Next.js (App Router, React 19, TypeScript)
+- **Styling:** Vanilla CSS (CSS Modules + Global variables)
+- **External Services:**
+  - **Supabase:** Postgres Database hosting products catalog.
+  - **Google Drive:** Image host (URLs are parsed to thumbnail endpoints for live display).
+  - **Vercel:** Deployment host.
+- **Security:**
+  - Server-side environment secrets (`SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_PASSWORD`)
+  - Web Crypto API-based JWT sessions (zero third-party dependencies).
+  - Edge Middleware-based redirection of unauthorized traffic.
+  - HTTP-Only, SameSite=Strict cookies.
+
+---
+
+## Key Conventions and Patterns
+
+1. **Strict Server-Side Database Communication:** No Supabase JS client calls on client components. All database requests are routed through Next.js server actions or API endpoints to guard the Service Role Key.
+2. **Drive Image Thumbnail Resolution:** Whenever a user pastes a Google Drive link, the application parses the unique file ID and converts it to `https://drive.google.com/thumbnail?id=[ID]&sz=w1000` to serve the image preview natively within `<img>` tags.
+3. **Vanilla CSS Design Tokens:** All sizing, spacings, animations, and color schemes are mapped to CSS custom variables in `src/app/globals.css`.
+4. **Price and Discount Synchronization:** On product creation or modification, both `price` and `original_price` columns are set to the base price entered by the user. Applying a category discount calculates a new value for `price` while keeping `original_price` populated as the baseline. Clearing discounts copies `original_price` back into the `price` column, keeping both fields populated and in sync.
+
+---
+
+## UI/Motion
+
+- **Component Foundation:** Vanilla HTML/React tags with CSS Modules styling.
+- **Motion Budget:** Utility admin panel — motion is functional and restrained. Capped at 150ms-250ms for high responsiveness.
+- **Tokens Configured in `globals.css`:**
+  - `--ease-standard: cubic-bezier(0.4, 0, 0.2, 1)`
+  - `--duration-fast: 150ms`
+  - `--duration-base: 250ms`
+  - Tinted color surfaces (no pure grays or blacks) for a luxury brand feel.
+
+---
+
+## SEO
+*Not active (Admin panel is private and non-indexed).*
+
+---
+
+## Audit Findings
+*None.*

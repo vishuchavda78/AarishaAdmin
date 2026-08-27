@@ -67,6 +67,23 @@
   color: var(--color-danger);
 }
 
+.headerLink {
+  background: none;
+  border: 1px solid var(--border-subtle);
+  padding: var(--space-2) var(--space-4);
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all var(--duration-fast) var(--ease-standard);
+}
+
+.headerLink:hover {
+  border-color: var(--color-gold);
+  color: var(--color-gold);
+}
+
 /* Main Dashboard Layout */
 .mainContainer {
   display: grid;

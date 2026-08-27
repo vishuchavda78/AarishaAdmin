@@ -4,6 +4,18 @@ All notable changes to the Aarisha Admin Panel will be documented in this file i
 
 ---
 
+## [2026-08-27 15:45]
+
+### [Category: Dev] — Separate Discounts Page and Selected-Product Discounts
+What changed:
+- Added a new `/discounts` page (`src/app/discounts/page.tsx`) with its own styles (`src/app/discounts/discounts.module.css`).
+- Extended `POST /api/discounts` to accept an optional `productIds` array so admins can apply or clear discounts for selected products within a category, instead of only category-wide.
+- Removed the duplicate bulk-discount widget from the dashboard sidebar and added a `Discounts` link in the dashboard header to navigate to the new page.
+- Updated `Context.md` to document the new route, UI flow, and API contract.
+Why: Move bulk discount management out of the dashboard into a dedicated page, and support per-product discount selection as requested.
+
+---
+
 ## [2026-08-27 14:50]
 
 ### [Category: Dev] — Upsert to Concurrent Updates & Dynamic Routing

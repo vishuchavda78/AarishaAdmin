@@ -25,6 +25,9 @@ c:\Projects\AarishaAdmin/
 │   │   │       ├── [id]/
 │   │   │       │   └── route.ts
 │   │   │       └── route.ts
+│   │   ├── discounts/
+│   │   │   ├── discounts.module.css
+│   │   │   └── page.tsx
 │   │   ├── login/
 │   │   │   ├── login.module.css
 │   │   │   └── page.tsx
@@ -61,6 +64,7 @@ c:\Projects\AarishaAdmin/
 - **Live Google Drive Previews:** Auto-extracts file IDs from shared Google Drive links, converting them into direct preview thumbnails (`/thumbnail?id=[ID]&sz=w1000`) for instant live preview in the form and grid view.
 - **Category Filters:** Rings, Neckpieces, Bracelets, and Earrings catalog filtering with dynamic item counts.
 - **Bulk Discounts:** Apply a percentage-based discount category-wide (storing pre-discount price in `original_price` to prevent stacked calculations) and clear discounts in bulk to restore original prices.
+- **Discounts Page:** Separate `/discounts` admin page for bulk discounts with category-wide and selected-product discount workflows.
 
 ### In-Progress
 - None.

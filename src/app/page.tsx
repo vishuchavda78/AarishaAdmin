@@ -47,9 +47,7 @@ export default function Dashboard() {
   const [formDescription, setFormDescription] = useState("");
   const [formInStock, setFormInStock] = useState(true);
 
-  // Bulk Discount Panel State
-  const [discountCategory, setDiscountCategory] = useState("all");
-  const [discountPercent, setDiscountPercent] = useState("");
+  
 
   // Auto-clear notification after 5s
   useEffect(() => {
@@ -278,80 +276,6 @@ export default function Dashboard() {
     }
   };
 
-  // Apply Bulk Discount Action
-  const handleApplyDiscount = async () => {
-    const percent = parseFloat(discountPercent);
-    if (isNaN(percent) || percent <= 0 || percent > 100) {
-      showNotification("Discount percent must be between 1 and 100.", true);
-      return;
-    }
-
-    const categoryText = discountCategory === "all" ? "all categories" : `${discountCategory}`;
-    if (!confirm(`Are you sure you want to apply a ${percent}% discount to ${categoryText}?`)) {
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const res = await fetch("/api/discounts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "apply",
-          category: discountCategory,
-          value: percent,
-        }),
-      });
-
-      const data = await res.json();
-      if (res.ok && data.success) {
-        showNotification(data.message);
-        setDiscountPercent("");
-        fetchProducts(); // Refresh
-      } else {
-        showNotification(data.error || "Failed to apply bulk discount.", true);
-      }
-    } catch (err) {
-      console.error("Apply discount error:", err);
-      showNotification("Network error applying discount.", true);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Clear Bulk Discount Action
-  const handleClearDiscount = async () => {
-    const categoryText = discountCategory === "all" ? "all categories" : `${discountCategory}`;
-    if (!confirm(`Are you sure you want to clear active discounts and restore prices for ${categoryText}?`)) {
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const res = await fetch("/api/discounts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "clear",
-          category: discountCategory,
-        }),
-      });
-
-      const data = await res.json();
-      if (res.ok && data.success) {
-        showNotification(data.message);
-        fetchProducts(); // Refresh
-      } else {
-        showNotification(data.error || "Failed to clear discount.", true);
-      }
-    } catch (err) {
-      console.error("Clear discount error:", err);
-      showNotification("Network error clearing discount.", true);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Compute counts for categories (sidebar view)
   const categoryCounts = useMemo(() => {
     const counts: { [key: string]: number } = { all: products.length, rings: 0, neckpieces: 0, bracelets: 0, earrings: 0 };
@@ -393,6 +317,9 @@ export default function Dashboard() {
           <span className={styles.badge}>Admin Panel</span>
         </div>
         <div className={styles.headerActions}>
+          <button onClick={() => router.push("/discounts")} className={styles.headerLink}>
+            Discounts
+          </button>
           <button onClick={handleLogout} className={styles.logoutBtn}>
             Log Out
           </button>
@@ -463,53 +390,7 @@ export default function Dashboard() {
             </select>
           </div>
 
-          {/* Bulk Discounts Portal */}
-          <div className={styles.sidebarSection}>
-            <span className={styles.sectionTitle}>Bulk Discount Portal</span>
-            <div className={styles.discountBox}>
-              <label className={styles.formLabel}>Target Category</label>
-              <select
-                value={discountCategory}
-                onChange={(e) => setDiscountCategory(e.target.value)}
-                className={styles.selectInput}
-                style={{ fontSize: "0.8rem", padding: "6px" }}
-              >
-                <option value="all">All Products</option>
-                <option value="rings">Rings</option>
-                <option value="neckpieces">Neckpieces</option>
-                <option value="bracelets">Bracelets</option>
-                <option value="earrings">Earrings</option>
-              </select>
-              
-              <label className={styles.formLabel}>Discount Rate (%)</label>
-              <div className={styles.discountInputRow}>
-                <input
-                  type="number"
-                  value={discountPercent}
-                  onChange={(e) => setDiscountPercent(e.target.value)}
-                  placeholder="15"
-                  className={styles.discountInput}
-                  disabled={loading}
-                  min="1"
-                  max="100"
-                />
-                <button
-                  onClick={handleApplyDiscount}
-                  className={styles.applyDiscountBtn}
-                  disabled={loading || !discountPercent}
-                >
-                  Apply
-                </button>
-              </div>
-              <button
-                onClick={handleClearDiscount}
-                className={styles.clearDiscountBtn}
-                disabled={loading}
-              >
-                Clear Category Discounts
-              </button>
-            </div>
-          </div>
+
         </aside>
 
         {/* Dashboard Main Workspace */}
